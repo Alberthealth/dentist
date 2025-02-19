@@ -71,7 +71,7 @@
             line-height: 1.4;
         }
         textarea {
-            width: 100%;
+            width: 98%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -111,7 +111,7 @@
             gap: 5px;
             min-width: 100px;
         }
-        input#pname, input#pid, input#doctor {
+        input#pname, input#pid, input#doctor, input#clinician {
             font-size: 20px; 
             width: 300px; 
             height: 50px;
@@ -169,7 +169,7 @@
         }
         
         .tooth-table-2, .tooth-table input {
-            width: 50px;
+            width: 200px;
             height: 28px;
             padding: 4px;
             text-align: center;
@@ -209,11 +209,11 @@
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const treatmentCheckboxes = document.querySelectorAll('[name="next_treatment"]');
+            const treatmentCheckboxes = document.querySelectorAll('[name="next_treatment"], [name="proposed_treatment"]');
     
             treatmentCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
-                    const tableInputs = checkbox.closest('.treatment-item, .simple-treatment')?.querySelectorAll('input[type="number"]');
+                    const tableInputs = checkbox.closest('.treatment-item, .simple-treatment')?.querySelectorAll('input[type="text"]');
                     if (tableInputs) {
                         tableInputs.forEach(input => {
                             input.disabled = !checkbox.checked;
@@ -225,7 +225,7 @@
                 });
     
                 // 初始化狀態
-                const tableInputs = checkbox.closest('.treatment-item, .simple-treatment')?.querySelectorAll('input[type="number"]');
+                const tableInputs = checkbox.closest('.treatment-item, .simple-treatment')?.querySelectorAll('input[type="text"]');
                 if (tableInputs) {
                     tableInputs.forEach(input => {
                         input.disabled = !checkbox.checked;
@@ -238,7 +238,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 選取所有 location-item 的 checkbox 和對應的 tooth-table
             const locationCheckboxes = document.querySelectorAll('.location-checkboxes input[type="checkbox"]');
-            const toothTables = document.querySelectorAll('.tooth-table input[type="number"]');
+            const toothTables = document.querySelectorAll('.tooth-table input[type="text"]');
     
             // 初始化時禁用所有 tooth-table 的 input
             toothTables.forEach(input => input.disabled = true);
@@ -248,7 +248,7 @@
                 checkbox.addEventListener('change', () => {
                     // 獲取當前分組的所有 checkbox
                     const group = checkbox.closest('.location-group');
-                    const inputs = group.querySelectorAll('.tooth-table input[type="number"]');
+                    const inputs = group.querySelectorAll('.tooth-table input[type="text"]');
     
                     // 如果該組至少有一個 checkbox 被選中，啟用對應的 tooth-table
                     const anyChecked = Array.from(group.querySelectorAll('input[type="checkbox"]')).some(cb => cb.checked);
@@ -261,6 +261,52 @@
                 });
             });
         });
+        function validateID() {
+            var id = document.getElementById("pid").value.toUpperCase();
+            
+            // 基本格式檢查：1個英文字母開頭，接著9個數字
+            var regex = /^[A-Z][0-9]{9}$/;
+            if (!regex.test(id)) {
+                alert("格式錯誤，請輸入正確的身份證字號格式");
+                return false;
+            }
+            
+            // 身份證字母對應數值
+            var letterMapping = {
+                A:10, B:11, C:12, D:13, E:14, F:15, G:16, H:17, I:34,
+                J:18, K:19, L:20, M:21, N:22, O:35, P:23, Q:24, R:25,
+                S:26, T:27, U:28, V:29, W:32, X:30, Y:31, Z:33
+            };
+            
+            var firstChar = id.charAt(0);
+            if (!(firstChar in letterMapping)) {
+                alert("無效的身份證字母");
+                return false;
+            }
+            
+            // 取得字母對應的兩位數值
+            var code = letterMapping[firstChar];
+            var n1 = Math.floor(code / 10);
+            var n2 = code % 10;
+            
+            // 檢查碼算法：字母轉換後，第一位乘以 1，第二位乘以 9，
+            // 接下來各位數分別乘以 8, 7, 6, 5, 4, 3, 2, 1，最後檢查碼乘以 1，
+            // 總和若能被 10 整除則為合法身份證字號。
+            var sum = n1 * 1 + n2 * 9;
+            var weights = [8, 7, 6, 5, 4, 3, 2, 1];
+            for (var i = 0; i < weights.length; i++) {
+                sum += parseInt(id.charAt(i + 1)) * weights[i];
+            }
+            // 最後一位數（檢查碼）乘以 1
+            sum += parseInt(id.charAt(9));
+            
+            if (sum % 10 === 0) {
+                return true;
+            } else {
+                alert("身份證字號驗證失敗");
+                return false;
+            }
+            }
     </script>
     
 </head>
@@ -272,14 +318,23 @@
                 <label for="doctor">醫師：</label>
                 <input list="doctor-names" type="text" id="doctor" name="doctor_name" required>
                 <datalist id="doctor-names">
-                    <option value="黃立瑋 A200000001">
-                    <option value="張正夫 C100000001">
-                    <option value="羅可聘 J1000000001">
-                    <option value="李金聰 A100000001">
-                    <option value="李桑喆 F100000001">
-                    <option value="鄭俊東 N100000001">
+                    <option value="黃立瑋 3701027584_1">
+                    <option value="張正夫 3701011764_1">
+                    <option value="羅可聘 3701110995_1">
+                    <option value="李金聰 3701011764_2">
+                    <option value="李桑喆 3731062911_1">
+                    <option value="鄭俊東 3731141873_1">
                 </datalist>
             </h1>
+            <h1>
+                <label for="clinician">醫護人員：</label>
+                <input list="clinician-names" type="text" id="clinician" name="clinician_name" required>
+                <datalist id="clinician-names">
+                    <option value="李宜芳 001">
+                </datalist>
+            </h1>
+        </div>
+        <div style="display: flex; gap: 20px;">
             <h1><label for="pname">姓名：</label><input type="text" id="pname" name="pname" required></h1>
             <h1><label for="pid">身份證字號：</label><input type="text" id="pid" name="pid" required></h1>
         </div>
@@ -300,6 +355,23 @@
                     <input type="checkbox" id="complaint3" name="complaint" value="拔牙 - Ask for oral examination and pain relief due to mobility tooth and swelling">
                     <label for="complaint3">拔牙 - Ask for oral examination and pain relief due to mobility tooth and swelling</label>
                 </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="complaint4" name="complaint" value="檢查 - Ask for oral examination">
+                    <label for="complaint4">檢查 - Ask for oral examination</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="complaint5" name="complaint" value="咬傷 - Lip bite">
+                    <label for="complaint5">咬傷 - Lip bite</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="complaint6" name="complaint" value="口腔潰瘍 - Oral ulcer">
+                    <label for="complaint6">口腔潰瘍 - Oral ulcer</label>
+                </div>
+                
+            </div>
+            <div>
+                <label for="complaint7">備註：</label>
+                <textarea id="complaint7" name="complaint_note" rows="3"></textarea>
             </div>
         </div>
 
@@ -338,14 +410,21 @@
                         <input type="checkbox" id="loc_lingual" name="cavity_location" value="Lingual">
                         <label for="loc_lingual">Lingual</label>
                     </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="loc_mesial" name="cavity_location" value="Mesial">
+                        <label for="loc_mesial">Mesial</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="loc_distal" name="cavity_location" value="Distal">
+                        <label for="loc_distal">Distal</label>
+                    </div>
+
                 </div>
                 <div style="display: flex; gap: 20px;">
                     <h4>牙位 #</h4>
-                    <table class="tooth-table">
+                    <table class="tooth-table" style="width: 50px;">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -374,14 +453,20 @@
                         <input type="checkbox" id="loc_lingual" name="caries_location" value="Lingual">
                         <label for="loc_lingual">Lingual</label>
                     </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="loc_mesial" name="cavity_location" value="Mesial">
+                        <label for="loc_mesial">Mesial</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="loc_distal" name="cavity_location" value="Distal">
+                        <label for="loc_distal">Distal</label>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 20px;">
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -403,9 +488,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -437,9 +520,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -471,12 +552,14 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
+            </div>
+            <div>
+                <label for="diagnosis8">備註：</label>
+                <textarea id="diagnosis8" name="diagnosis_note" rows="3"></textarea>
             </div>
         </div>
 
@@ -525,9 +608,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -562,9 +643,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -597,9 +676,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -622,9 +699,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -654,9 +729,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -673,9 +746,7 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
@@ -692,72 +763,230 @@
                     <h4>牙位 #</h4>
                     <table class="tooth-table">
                         <tr class="center-border-horizon">
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
-                            <td><input type="number" min="1" max="8" onblur="validateNumber(this)"></td>
+                            <td><input type="text"></td>
                         </tr>
                     </table>
                 </div>
             </div>
+            <div>
+                <label for="treatment11">備註：</label>
+                <textarea id="treatment11" name="treatment_note" rows="3"></textarea>
+            </div>
+                
         </div>
 
         <div class="section">
             <h2>衛教 </h2>
-            oral hygiene instruction for
+            Oral Hygiene Instruction for
+            <hr></hr>
             <div class="checkbox-group">
-    
-                <div class="checkbox-item">
+                Mouth cleaning with 
+                <div class="location-checkboxes">
+                    <div class="location-item">
+                        <input type="checkbox" id="mouth_cleaning" name="instruction" value="Tooth Brush">
+                        <label for="mouth_cleaning">Tooth Brush</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="mouth_cleaning" name="instruction" value="Interdental Brush">
+                        <label for="mouth_cleaning">Interdental Brush</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="mouth_cleaning" name="instruction" value="Dental Floss">
+                        <label for="mouth_cleaning">Dental Floss</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="mouth_cleaning" name="instruction" value="Oral Sponge Brush">
+                        <label for="mouth_cleaning">Oral Sponge Brush</label>
+                    </div>
+                    <div class="location-item">
+                        <input type="checkbox" id="mouth_cleaning" name="instruction" value="Mouthwash">
+                        <label for="mouth_cleaning">Mouthwash</label>
+                    </div>
+                </div>
+                <!-- <div class="checkbox-item">
                     <input type="checkbox" id="instruction1" name="instruction" value="mouth cleaning of the oral mucosa with some oral sponge brush">
                     <label for="instruction1">mouth cleaning of the oral mucosa with some oral sponge brush</label>
                 </div>
                 <div class="checkbox-item">
                     <input type="checkbox" id="instruction2" name="instruction" value="teeth cleaning with correct tooth brush, interdental brush and dental floss">
                     <label for="instruction2">teeth cleaning with correct tooth brush, interdental brush and dental floss</label>
+                </div> -->
+                <div class="checkbox-item">
+                    <input type="checkbox" id="instruction3" name="instruction" value="Dry mouth soothing with some oral moisturizing gel application">
+                    <label for="instruction3">Dry mouth soothing with some oral moisturizing gel application</label>
                 </div>
                 <div class="checkbox-item">
-                    <input type="checkbox" id="instruction3" name="instruction" value="dry mouth soothing with some oral moisturizing gel application">
-                    <label for="instruction3">dry mouth soothing with some oral moisturizing gel application</label>
+                    <input type="checkbox" id="instruction7" name="instruction" value="Soft diet after filling tooth">
+                    <label for="instruction7">Soft diet after filling tooth</label>
                 </div>
                 <div class="checkbox-item">
-                    <input type="checkbox" id="instruction7" name="instruction" value="soft diet after filling tooth">
-                    <label for="instruction7">soft diet after filling tooth</label>
+                    <input type="checkbox" id="instruction4" name="instruction" value="Fasting for 30 minutes after fluoride application">
+                    <label for="instruction4">Fasting for 30 minutes after fluoride application</label>
                 </div>
                 <div class="checkbox-item">
-                    <input type="checkbox" id="instruction4" name="instruction" value="fasting for 30 minutes after fluoride application">
-                    <label for="instruction4">fasting for 30 minutes after fluoride application</label>
+                    <input type="checkbox" id="instruction5" name="instruction" value="Precautions after tooth extraction and give health education information">
+                    <label for="instruction5">Precautions after tooth extraction and give health education information</label>
                 </div>
                 <div class="checkbox-item">
-                    <input type="checkbox" id="instruction5" name="instruction" value="precautions after tooth extraction and give health education information">
-                    <label for="instruction5">precautions after tooth extraction and give health education information</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="instruction6" name="instruction" value="having regular oral examinations">
-                    <label for="instruction6">having regular oral examinations</label>
+                    <input type="checkbox" id="instruction6" name="instruction" value="Having regular oral examinations">
+                    <label for="instruction6">Having regular oral examinations</label>
                 </div>
                 
             </div>
+            <div>
+                <label for="note_instruction">備註：</label>
+                <textarea id="note_instruction" name="instruction_note" rows="3"></textarea>
+            </div>
         </div>
+
+        <div class="section">
+            <h2>擬定治療項目</h2>
+            
+            <div class="treatment-grid">
+                
+                
+        
+                <!-- 需要牙位的項目 -->
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed1" name="proposed_treatment"  value="單面蛀牙填補">
+                            <label>單面蛀牙填補</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_1">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed2" name="proposed_treatment" value="局部牙結石清除">
+                            <label>局部牙結石清除</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_2">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed3" name="proposed_treatment" value="牙周敷料">
+                            <label>牙周敷料</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_3">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed4" name="proposed_treatment" value="牙周病緊急處理">
+                            <label>牙周病緊急處理</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_4">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed5" name="proposed_treatment" value="牙周暨齲齒控制基本處置">
+                            <label>牙周暨齲齒控制基本處置</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_5">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed6" name="proposed_treatment" value="特定局部治療">
+                            <label>特定局部治療</label>
+                        </div>
+                        <table class="tooth-table-2" id="擬定治療項目_6">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="proposed7" name="proposed_treatment" value="簡單性拔牙">
+                            <label>簡單性拔牙</label>
+                        </div>
+                        
+                        <table class="tooth-table-2" id="擬定治療項目_7">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- 簡單項目，不需要牙位的 -->
+                <div class="simple-treatment">
+                    <input type="checkbox" id="proposed8" name="proposed_treatment" value="定期檢查及衛教">
+                    <label for="proposed8">定期檢查及衛教</label>
+                </div>
+                
+                <div class="simple-treatment">
+                    <input type="checkbox" id="proposed9" name="proposed_treatment" value="塗氟">
+                    <label for="proposed9">塗氟</label>
+                </div>
+
+                <div class="simple-treatment">
+                    <input type="checkbox" id="proposed10" name="proposed_treatment" value="全口牙結石清除">
+                    <label for="proposed10">全口牙結石清除</label>
+                </div>
+
+                <div class="simple-treatment">
+                    <input type="checkbox" id="proposed11" name="proposed_treatment" value="非特定局部治療">
+                    <label for="proposed11">非特定局部治療</label>
+                </div>
+            </div>
+        </div>
+
+
 
         <div class="section">
             <h2>下次治療項目</h2>
             
             <div class="treatment-grid">
                 
-                <!-- 簡單項目，不需要牙位的 -->
-                <div class="simple-treatment">
-                    <input type="checkbox" id="next1" name="next_treatment" value="定期檢查及衛教">
-                    <label for="next1">定期檢查及衛教</label>
-                </div>
                 
-                <div class="simple-treatment">
-                    <input type="checkbox" id="next2" name="next_treatment" value="塗氟">
-                    <label for="next2">塗氟</label>
-                </div>
-
-                <div class="simple-treatment">
-                    <input type="checkbox" id="next4" name="next_treatment" value="全口牙結石清除">
-                    <label for="next4">全口牙結石清除</label>
-                </div>
 
 
         
@@ -765,15 +994,43 @@
                 <div class="treatment-item">
                     <div class="treatment-item-content">
                         <div class="treatment-label">
-                            <input type="checkbox" id="next3" name="next_treatment"  value="單面蛀牙填補">
+                            <input type="checkbox" id="next1" name="next_treatment"  value="單面蛀牙填補">
                             <label>單面蛀牙填補</label>
+                        </div>
+                        <table class="tooth-table-2" id="下次治療項目_1">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="next2" name="next_treatment" value="局部牙結石清除">
+                            <label>局部牙結石清除</label>
+                        </div>
+                        <table class="tooth-table-2" id="下次治療項目_2">
+                            <tr>
+                                <td>#</td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="treatment-item">
+                    <div class="treatment-item-content">
+                        <div class="treatment-label">
+                            <input type="checkbox" id="next3" name="next_treatment" value="牙周敷料">
+                            <label>牙周敷料</label>
                         </div>
                         <table class="tooth-table-2" id="下次治療項目_3">
                             <tr>
                                 <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
+                                <td><input type="text"></td>
                             </tr>
                         </table>
                     </div>
@@ -782,15 +1039,13 @@
                 <div class="treatment-item">
                     <div class="treatment-item-content">
                         <div class="treatment-label">
-                            <input type="checkbox" id="next4" name="next_treatment" value="局部牙結石清除">
-                            <label>局部牙結石清除</label>
+                            <input type="checkbox" id="next4" name="next_treatment" value="牙周病緊急處理">
+                            <label>牙周病緊急處理</label>
                         </div>
                         <table class="tooth-table-2" id="下次治療項目_4">
                             <tr>
                                 <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
+                                <td><input type="text"></td>
                             </tr>
                         </table>
                     </div>
@@ -799,32 +1054,30 @@
                 <div class="treatment-item">
                     <div class="treatment-item-content">
                         <div class="treatment-label">
-                            <input type="checkbox" id="next5" name="next_treatment" value="牙周敷料">
-                            <label>牙周敷料</label>
+                            <input type="checkbox" id="next5" name="next_treatment" value="牙周暨齲齒控制基本處置">
+                            <label>牙周暨齲齒控制基本處置</label>
                         </div>
                         <table class="tooth-table-2" id="下次治療項目_5">
                             <tr>
                                 <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
+                                <td><input type="text"></td>
                             </tr>
                         </table>
                     </div>
                 </div>
         
+                
+        
                 <div class="treatment-item">
                     <div class="treatment-item-content">
                         <div class="treatment-label">
-                            <input type="checkbox" id="next6" name="next_treatment" value="牙周病緊急處理">
-                            <label>牙周病緊急處理</label>
+                            <input type="checkbox" id="next6" name="next_treatment" value="特定局部治療">
+                            <label>特定局部治療</label>
                         </div>
                         <table class="tooth-table-2" id="下次治療項目_6">
                             <tr>
                                 <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
+                                <td><input type="text"></td>
                             </tr>
                         </table>
                     </div>
@@ -833,58 +1086,37 @@
                 <div class="treatment-item">
                     <div class="treatment-item-content">
                         <div class="treatment-label">
-                            <input type="checkbox" id="next7" name="next_treatment" value="牙周暨齲齒控制基本處置">
-                            <label>牙周暨齲齒控制基本處置</label>
-                        </div>
-                        <table class="tooth-table-2" id="下次治療項目_7">
-                            <tr>
-                                <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-        
-                <div class="simple-treatment">
-                    <input type="checkbox" id="next8" name="next_treatment" value="非特定局部治療">
-                    <label for="next8">非特定局部治療</label>
-                </div>
-        
-                <div class="treatment-item">
-                    <div class="treatment-item-content">
-                        <div class="treatment-label">
-                            <input type="checkbox" id="next9" name="next_treatment" value="特定局部治療">
-                            <label>特定局部治療</label>
-                        </div>
-                        <table class="tooth-table-2" id="下次治療項目_9">
-                            <tr>
-                                <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-        
-                <div class="treatment-item">
-                    <div class="treatment-item-content">
-                        <div class="treatment-label">
-                            <input type="checkbox" id="next10" name="next_treatment" value="簡單性拔牙">
+                            <input type="checkbox" id="next7" name="next_treatment" value="簡單性拔牙">
                             <label>簡單性拔牙</label>
                         </div>
                         
-                        <table class="tooth-table-2" id="下次治療項目_10">
+                        <table class="tooth-table-2" id="下次治療項目_7">
                             <tr>
                                 <td>#</td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
-                                <td><input type="number" min="11" max="48" onblur="validateNumber(this)"></td>
+                                <td><input type="text"></td>
                             </tr>
                         </table>
                     </div>
+                </div>
+                <!-- 簡單項目，不需要牙位的 -->
+                <div class="simple-treatment">
+                    <input type="checkbox" id="next8" name="next_treatment" value="定期檢查及衛教">
+                    <label for="next8">定期檢查及衛教</label>
+                </div>
+                
+                <div class="simple-treatment">
+                    <input type="checkbox" id="next9" name="next_treatment" value="塗氟">
+                    <label for="next9">塗氟</label>
+                </div>
+
+                <div class="simple-treatment">
+                    <input type="checkbox" id="next10" name="next_treatment" value="全口牙結石清除">
+                    <label for="next10">全口牙結石清除</label>
+                </div>
+
+                <div class="simple-treatment">
+                    <input type="checkbox" id="next11" name="next_treatment" value="非特定局部治療">
+                    <label for="next11">非特定局部治療</label>
                 </div>
             </div>
         </div>
@@ -922,11 +1154,17 @@
         }
     }
     function exportToCSV() {
+        idcheck = validateID();
+        if (idcheck == false) {
+            return;
+        }
+        
         const rows = [];
         const name = document.getElementById('pname').value;
         const id = document.getElementById('pid').value;
         const doctor = document.getElementById('doctor').value;
         const date = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+        const clinician = document.getElementById('clinician').value;
         if (!name.trim()) {
             alert('請輸入姓名！');
             return; // Stop the function if the name field is empty
@@ -943,8 +1181,9 @@
         rows.push(['姓名', '',`"${name}"`]);
         rows.push(['身份證字號', '', `"${id}"`])
         rows.push(['醫生', '', `"${doctor}"`])
+        rows.push(['醫護人員', '', `"${clinician}"`])
         rows.push(['日期', '', `"${date}"`])
-        let categoryCounters = { 主訴: 0, 診斷: 0, 治療: 0, 衛教: 0, 下次治療項目: 0 };
+        let categoryCounters = { 主訴: 0, 診斷: 0, 治療: 0, 衛教: 0, 擬定治療項目: 0, 下次治療項目: 0 };
 
         function addRow(category, content, checked, subCategory = '') {
             categoryCounters[category]++;
@@ -962,13 +1201,16 @@
         document.querySelectorAll('[name="complaint"]').forEach(el => {
             addRow('主訴', el.value, el.checked);
         });
-
+        document.querySelectorAll('[name="complaint_note"]').forEach(el => {
+            addRow('主訴', '備註', el.value);
+        });
+        
         // Diagnoses (診斷)
         document.querySelectorAll('[id="diagnosis1"]').forEach(el => {
             const subCategory = getParentH3(el);
             addRow('診斷', el.value, el.checked, subCategory);
         });
-
+        
         document.querySelectorAll('[name="cavity_location"]').forEach(el => {
             const subCategory = getParentH3(el);
             addRow('診斷', el.value + ' cavity', el.checked, subCategory);
@@ -989,7 +1231,9 @@
             const subCategory = getParentH3(el);
             addRow('診斷', el.value + ' side periodontal swelling', el.checked, subCategory);
         });
-
+        document.querySelectorAll('[name="diagnosis_note"]').forEach(el => {
+            addRow('診斷', '備註', el.value);
+        });
         // Treatments (治療)
         document.querySelectorAll('[id="co_treatment"]').forEach(el => {
             const subCategory = getParentH3(el);
@@ -1028,12 +1272,24 @@
             const subCategory = getParentH3(el);
             addRow('治療', el.value, el.checked, subCategory);
         });
-
+        document.querySelectorAll('[name="treatment_note"]').forEach(el => {
+            addRow('治療', '備註', el.value);
+        });
         // Health Education (衛教)
+        document.querySelectorAll('[id^="mouth_cleaning"]').forEach(el => {
+            addRow('衛教', 'Mouth cleaning with ' + el.value, el.checked);
+        });
         document.querySelectorAll('[id^="instruction"]').forEach(el => {
             addRow('衛教', el.value, el.checked);
         });
-
+        document.querySelectorAll('[name="instruction_note"]').forEach(el => {
+            addRow('衛教', '備註', el.value);
+        });
+        // Next Treatment (擬定治療項目)
+        document.querySelectorAll('[name="proposed_treatment"]').forEach(el => {
+            const subCategory = getParentH3(el);
+            addRow('擬定治療項目', el.value, el.checked, subCategory);
+        });
         // Next Treatment (下次治療項目)
         document.querySelectorAll('[name="next_treatment"]').forEach(el => {
             const subCategory = getParentH3(el);
@@ -1050,16 +1306,16 @@
             if (!subCategory) {
                 subCategory = table.id
             }
-            const inputs = table.querySelectorAll('input[type="number"]');
-            inputs.forEach((input, inputIndex) => {
+            const inputs = table.querySelectorAll('input[type="text"]');
+            inputs.forEach((input) => {
                 const value = input.value || '';
-                rows.push([`${subCategory}`, `牙位_${inputIndex + 1}`, value]);
+                rows.push([`${subCategory}`, `牙位`, `"`+value+`"`]);
             });
         });
 
         // Generate and Download CSV
         
-        const fileName = name ? `medical_record_${name}_${id}_${date}.csv` : 'tooth_status.csv';
+        const fileName = name ? `soap_${name}_${id}_${date}.csv` : 'tooth_status.csv';
         const csvContent = rows.map(row => row.join(',')).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
