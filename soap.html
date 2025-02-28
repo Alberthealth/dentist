@@ -111,7 +111,7 @@
             gap: 5px;
             min-width: 100px;
         }
-        input#pname, input#pid, input#doctor, input#clinician {
+        input#pname, input#pid, input#doctor, input#clinician, input#sn {
             font-size: 20px; 
             width: 300px; 
             height: 50px;
@@ -267,11 +267,11 @@
             // 基本格式檢查：1個英文字母開頭，接著9個數字
             var regex = /^[A-Z][0-9]{9}$/;
             if (!regex.test(id)) {
-                alert("格式錯誤，請輸入正確的身份證字號格式");
+                alert("格式錯誤，請輸入正確的身分證字號格式");
                 return false;
             }
             
-            // 身份證字母對應數值
+            // 身分證字母對應數值
             var letterMapping = {
                 A:10, B:11, C:12, D:13, E:14, F:15, G:16, H:17, I:34,
                 J:18, K:19, L:20, M:21, N:22, O:35, P:23, Q:24, R:25,
@@ -280,7 +280,7 @@
             
             var firstChar = id.charAt(0);
             if (!(firstChar in letterMapping)) {
-                alert("無效的身份證字母");
+                alert("無效的身分證字母");
                 return false;
             }
             
@@ -291,7 +291,7 @@
             
             // 檢查碼算法：字母轉換後，第一位乘以 1，第二位乘以 9，
             // 接下來各位數分別乘以 8, 7, 6, 5, 4, 3, 2, 1，最後檢查碼乘以 1，
-            // 總和若能被 10 整除則為合法身份證字號。
+            // 總和若能被 10 整除則為合法身分證字號。
             var sum = n1 * 1 + n2 * 9;
             var weights = [8, 7, 6, 5, 4, 3, 2, 1];
             for (var i = 0; i < weights.length; i++) {
@@ -303,7 +303,7 @@
             if (sum % 10 === 0) {
                 return true;
             } else {
-                alert("身份證字號驗證失敗");
+                alert("身分證字號驗證失敗");
                 return false;
             }
             }
@@ -314,7 +314,7 @@
     <div class="container">
         <h1>牙科到宅醫療病歷表</h1>
         <div style="display: flex; gap: 20px;">
-            <h1>
+            <h2>
                 <label for="doctor">醫師：</label>
                 <input list="doctor-names" type="text" id="doctor" name="doctor_name" required>
                 <datalist id="doctor-names">
@@ -325,18 +325,19 @@
                     <option value="李桑喆 3731062911_1">
                     <option value="鄭俊東 3731141873_1">
                 </datalist>
-            </h1>
-            <h1>
+            </h2>
+            <h2>
                 <label for="clinician">醫護人員：</label>
                 <input list="clinician-names" type="text" id="clinician" name="clinician_name" required>
                 <datalist id="clinician-names">
                     <option value="李宜芳 001">
                 </datalist>
-            </h1>
+            </h2>
         </div>
         <div style="display: flex; gap: 20px;">
-            <h1><label for="pname">姓名：</label><input type="text" id="pname" name="pname" required></h1>
-            <h1><label for="pid">身份證字號：</label><input type="text" id="pid" name="pid" required></h1>
+            <h2><label for="pname">姓名：</label><input type="text" id="pname" name="pname" required></h2>
+            <h2><label for="pid">身分證字號：</label><input type="text" id="pid" name="pid" required></h2>
+            <h2><label for="sn">序號：</label><input type="text" id="sn" name="sn" required></h2>
         </div>
         <div class="section">
             <h2>主訴</h2>
@@ -751,23 +752,7 @@
                     </table>
                 </div>
             </div>
-            <div class="location-group">
-                <h3>拆線治療</h3>
-                <div class="location-checkboxes">
-                    <div class="location-item">
-                        <input type="checkbox" id="remove_stitches" name="remove_stitches" value="remove stitches under Iodine application">
-                        <label for="remove_stitches">remove stitches under Iodine application</label>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 20px;">
-                    <h4>牙位 #</h4>
-                    <table class="tooth-table">
-                        <tr class="center-border-horizon">
-                            <td><input type="text"></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+            
             <div>
                 <label for="treatment11">備註：</label>
                 <textarea id="treatment11" name="treatment_note" rows="3"></textarea>
@@ -1165,12 +1150,13 @@
         const doctor = document.getElementById('doctor').value;
         const date = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
         const clinician = document.getElementById('clinician').value;
+        const number = document.getElementById('sn').value;
         if (!name.trim()) {
             alert('請輸入姓名！');
             return; // Stop the function if the name field is empty
         }
         if (!id.trim()) {
-            alert('請輸入身份證字號！');
+            alert('請輸入身分證字號！');
             return; // Stop the function if the name field is empty
         }
         if (!doctor.trim()) {
@@ -1179,10 +1165,11 @@
         }
         rows.push(['category', 'subcategory', 'content']);
         rows.push(['姓名', '',`"${name}"`]);
-        rows.push(['身份證字號', '', `"${id}"`])
+        rows.push(['身分證字號', '', `"${id}"`])
         rows.push(['醫生', '', `"${doctor}"`])
         rows.push(['醫護人員', '', `"${clinician}"`])
         rows.push(['日期', '', `"${date}"`])
+        rows.push(['序號', '', `"${number}"`])
         let categoryCounters = { 主訴: 0, 診斷: 0, 治療: 0, 衛教: 0, 擬定治療項目: 0, 下次治療項目: 0 };
 
         function addRow(category, content, checked, subCategory = '') {
